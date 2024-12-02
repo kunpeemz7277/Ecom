@@ -1,0 +1,121 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db1 {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+//ผู้ใช้
+model User {
+  // set ค่า id เป็น default และให้จัดการเองอัตโนมัติ
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String? //สามารถใส่ค่าว่างได้ เพราะจะไปต่อยอด login Google
+  name      String?
+  picture   String?
+  role      String?  @default("user")
+  enabled   Boolean  @default(true) //เอาไว้เปิดปิดผู้ใช้งาน ถ้าสมัครแล้วจะเป็น true
+  address   String?
+  orders    Order[]
+  carts     Cart[]
+  createdAt DateTime @default(now()) //บันทึกเวลาลงข้อมูล
+  updatedAt DateTime @updatedAt //แก้ไขเวลาลงข้อมูล
+}
+
+//สินค้า
+model Product {
+  id          Int              @id @default(autoincrement())
+  title       String
+  description String
+  price       Float
+  sold        Int              @default(0) //ขายไปแล้วเท่าไหร่
+  quantity    Int //จำนวนสินค้า
+  orderItems  ProductOnOrder[] //1 สินค้ามีได้หลายออเดอร์ใส่ [] คือ many
+  cartItems   ProductOnCart[]
+  images      Image[]
+  createdAt   DateTime         @default(now()) //บันทึกเวลาลงข้อมูล
+  updatedAt   DateTime         @updatedAt //แก้ไขเวลาลงข้อมูล
+  category    Category?        @relation(fields: [categoryId], references: [id])
+  categoryId  Int?
+}
+
+//รายการสั่งซื้อ
+model Order {
+  id              Int              @id @default(autoincrement())
+  products        ProductOnOrder[] //1 ออเดอร์มีสินค้าได้หลายชิ้นใส่ [] คือ many
+  cartTotal       Float //ราคารวมสินค้าทั้งหมด
+  orderStatus     String           @default("Not Process")
+  createdAt       DateTime         @default(now()) //บันทึกเวลาลงข้อมูล
+  updatedAt       DateTime         @updatedAt //แก้ไขเวลาลงข้อมูล
+  orderBy         User             @relation(fields: [orderById], references: [id]) //ออเดอร์นี้ซื้อโดยใคร
+  orderById       Int
+  stripePaymentId String
+  amount          Int
+  status          String
+  currentcy       String
+}
+
+//1 to many 1 สินค้ามีได้หลายออเดอร์ และ 1 ออเดอร์มีสินค้าได้หลายชิ้น
+//onDelete: Cascade คือเวลาตารางหลักถูกลบ ข้อมูล ProductOnOrder ก็จะถูกลบไปด้วย
+model ProductOnOrder {
+  id        Int     @id @default(autoincrement())
+  //ใช้ relation เพื่อเชื่อมกัน
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId Int
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId   Int
+  count     Int //จำนวน
+  price     Float // ราคา
+}
+
+//ประเภทสินค้า
+model Category {
+  id        Int       @id @default(autoincrement())
+  name      String
+  products  Product[]
+  createdAt DateTime  @default(now()) //บันทึกเวลาลงข้อมูล
+  updatedAt DateTime  @updatedAt //แก้ไขเวลาลงข้อมูล
+}
+
+//ตะกร้าสินค้า
+model Cart {
+  id          Int             @id @default(autoincrement())
+  products    ProductOnCart[] // 1 ตะกร้ามีได้หลายสินค้า
+  cartTotal   Float //ราคารวมสินค้าทั้งหมด
+  createdAt   DateTime        @default(now()) //บันทึกเวลาลงข้อมูล
+  updatedAt   DateTime        @updatedAt //แก้ไขเวลาลงข้อมูล
+  orderById   User?           @relation(fields: [orderedById], references: [id]) //ตะกร้านี้ซื้อโดยใคร
+  orderedById Int
+}
+
+//1 ตะกร้ามีสินค้าได้หลายชิ้น สินค้า 1 ชิ้นอยู่ได้หลายตะกร้า
+model ProductOnCart {
+  id        Int     @id @default(autoincrement())
+  cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  cartId    Int
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+  count     Int //จำนวน
+  price     Float //ราคา
+}
+
+//รูปสินค้า
+model Image {
+  id         Int      @id @default(autoincrement())
+  asset_id   String
+  public_id  String
+  url        String
+  secure_url String
+  createdAt  DateTime @default(now()) //บันทึกเวลาลงข้อมูล
+  updatedAt  DateTime @updatedAt //แก้ไขเวลาลงข้อมูล
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId  Int
+}
