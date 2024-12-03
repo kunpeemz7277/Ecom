@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom';
 import useEcomStore from '../../store/ecom-store'
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
@@ -7,6 +8,8 @@ const SearchCard = () => {
     const getProduct = useEcomStore((state) => state.getProduct)
     const products = useEcomStore((state) => state.products)
     const actionSearchFilters = useEcomStore((state) => state.actionSearchFilters)
+
+    const location = useLocation();
 
     const getCategory = useEcomStore((state) => state.getCategory)
     const categories = useEcomStore((state) => state.categories)
@@ -99,6 +102,12 @@ const SearchCard = () => {
     //     return () => clearTimeout(delay)
     // }, [Avgprice])
 
+    useEffect(() => {
+        const selectedCategory = location.state?.selectedCategory;
+        if (selectedCategory) {
+            setCategorySelected([selectedCategory]);
+        }
+    }, [location.state]);
 
     // Step 3 Search by Price
     useEffect(() => {
@@ -170,6 +179,7 @@ const SearchCard = () => {
                                     onChange={handleCheck}
                                     type="checkbox"
                                     value={item.id}
+                                    //checked={categorySelected.includes(item.name)}
                                 />
                                 <label>{item.name}</label>
                             </div>

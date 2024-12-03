@@ -106,17 +106,19 @@ function MainNav() {
                         </ul>
 
                         <Link to={'/cart'} >
-                            <div className='flex items-center gap-4 '>
-                                <div className='rounded-3xl border-black p-3 border'>
-                                    <ShoppingBasket />
-                                </div>
-                                {
-                                    carts.length > 0
-                                    && (
-                                        <p className='absolute right-[150px] top-[15px] bg-red-500 rounded-full px-2 text-black '>{carts.length}</p>
-                                    )
-                                }
+                            <div >
+                                <div className='flex items-center gap-4 '>
+                                    <div className='rounded-3xl border-black p-3 border hover:shadow-xl hover:hover:-translate-y-1 duration-300'>
+                                        <ShoppingBasket />
+                                    </div>
+                                    {
+                                        carts.length > 0
+                                        && (
+                                            <p className='absolute right-[170px] top-[15px] bg-red-500 rounded-full px-2 text-black '>{carts.length}</p>
+                                        )
+                                    }
 
+                                </div>
                             </div>
                         </Link>
 

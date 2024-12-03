@@ -25,6 +25,7 @@ import Aboutme from '../pages/Aboutme'
 import FAQ from '../pages/FAQ'
 import Contact from '../pages/Contact'
 import Detail from '../pages/Detail'
+import Article from '../pages/Article'
 
 const router = createBrowserRouter([
   {
@@ -38,7 +39,7 @@ const router = createBrowserRouter([
       { path: 'idea', element: <Idea /> },    
       { path: 'aboutme', element: <Aboutme /> },    
       { path: 'faq', element: <FAQ /> },    
-      //{ path: 'article', element: <Article /> },    
+      { path: 'article', element: <Article /> },    
       { path: 'contact', element: <Contact /> },    
       { path: 'checkout', element: <Checkout /> },
       { path: 'login', element: <Login /> },
