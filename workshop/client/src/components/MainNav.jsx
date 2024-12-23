@@ -1,20 +1,34 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import useEcomStore from '../store/ecom-store'
 import { ChevronDown, ShoppingBasket } from 'lucide-react';
+import { GoogleLogout } from 'react-google-login'
+
 import { toast } from 'react-toastify';
 
 
 //จัด css ในส่วนแถบ Menu ด้านบน
 function MainNav() {
+    const clientId = "903808923973-3o9ugl6tf03i3psofsnqlhgbhn046hrc.apps.googleusercontent.com"
+
     //Javascript
     const carts = useEcomStore((state) => state.carts)
     const user = useEcomStore((state) => state.user)
     const [isOpen, setIsOpen] = useState(false)
     const logout = useEcomStore((state) => state.logout)
 
+    const [profile, setProfile] = useState([])
     // console.log(Boolean(user))
 
+    useEffect(() => {
+        const initClient = () => {
+            gapi.client.init({
+                clientId: clientId,
+                scope: ''
+            })
+        }
+        gapi.load("client:auth2", initClient)
+    })
 
     const toggleDropDown = () => {
         setIsOpen(!isOpen)
@@ -24,9 +38,23 @@ function MainNav() {
 
     const handleLogout = () => {
         logout()
-        toast.success('Logout completed successfully.')
+        //toast.success('Logout completed successfully.')
         navigate('/')
     }
+
+    const logOut = () => {
+        setProfile(null);
+        logout()
+        //toast.success('Logout completed successfully.')
+        navigate('/')
+    }
+
+    const combinedLogoutHandler = () => {
+        handleLogout();
+        logOut();
+    };
+
+
 
     return (
 
@@ -52,7 +80,7 @@ function MainNav() {
             <div className='mx-auto px-4'>
                 <div className='flex justify-between h-16'>
                     <div className='flex items-center gap-4 '>
-                        <Link to={'/'} className='text-2xl font-bold'>LOGO</Link>
+                        <Link to={'/'} className='text-2xl font-bold'>TREEZ</Link>
                     </div>
 
                     <div className='flex items-center gap-4 '>
@@ -138,20 +166,32 @@ function MainNav() {
                                             <ChevronDown className='text-black' />
                                         </button>
 
-                                        {
-                                            isOpen &&
+                                        {isOpen && (
                                             <div className='absolute mt-2 top-20 bg-white shadow-xl rounded-md border z-50'>
                                                 <Link className='block px-4 py-2 hover:bg-gray-200 text-xl'>Profile</Link>
                                                 <Link to={'/user/history'} className='block px-4 py-2 hover:bg-gray-200 text-xl'>History</Link>
 
-                                                <button
-                                                    onClick={handleLogout}
-                                                    className='block px-4 py-2 hover:bg-gray-200 text-xl'>
-                                                    Logout
-                                                </button>
+                                                <GoogleLogout
+                                                    clientId={clientId}
+                                                    render={(renderprompt) => (
+                                                        <button
+                                                            onClick={renderprompt.onClick}
+                                                            disabled={renderprompt.disabled}
+                                                            className="block px-4 py-2 text-xl rounded hover:bg-gray-200"
+                                                        >
+                                                            Log out
+                                                        </button>
+                                                    )}
+                                                    onLogoutSuccess={combinedLogoutHandler}
+                                                />
+                                                {/*<button
+                                                        onClick={handleLogout}
+                                                        className='block px-4 py-2 hover:bg-gray-200 text-xl'>
+                                                        Logout
+                                                </button> */}
 
                                             </div>
-                                        }
+                                        )}
                                     </div>
                                     : <ul className="flex space-x-4 heading-text gap-3 my-auto">
                                         <Link to={'/login'}>
@@ -159,10 +199,6 @@ function MainNav() {
                                         </Link>
                                     </ul>
                             }
-
-
-
-
 
 
                         </div>

@@ -102,7 +102,6 @@ function Footer() {
 
             <div className="flex flex-col items-center gap-10 mr-9 mt-60 hover:text-black hover:-translate-y-1 duration-300 transform" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
                 <a
-                    href="#top"
                     className="text-gray-500  -rotate-90"
                 >
                     BACK TO TOP

@@ -7,7 +7,7 @@ import { motion } from "framer-motion"
 
 
 const ProductCard = ({ item }) => {
-    const actionAddtoCart = useEcomStore((state) => state.actionAddtoCart)
+    //const actionAddtoCart = useEcomStore((state) => state.actionAddtoCart)
     //console.log(item)
 
     return (

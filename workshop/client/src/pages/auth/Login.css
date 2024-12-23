@@ -1,4 +1,8 @@
-.login-page {
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}.login-page {
     display: flex;
     height: 100vh;
     background-color: #f8f9fa;

@@ -42,7 +42,7 @@ const ecomStore = (set, get) => ({
         const quantity = Number(qua) || 1; // กำหนดค่าเริ่มต้นเป็น 1
         const carts = get().carts;
         const existingItem = carts.find((cartItem) => cartItem.id === product.id);
-    
+
         if (existingItem) {
             set({
                 carts: carts.map((item) =>
@@ -87,6 +87,23 @@ const ecomStore = (set, get) => ({
         })
         return res
     },
+    actionSignInGoogle: async (idToken) => {
+        try {
+            // ส่ง idToken ไปยัง Backend สำหรับการตรวจสอบ
+            const res = await axios.post('http://localhost:5001/api/signin-google', { token: idToken });
+
+            // เก็บข้อมูลผู้ใช้และ token ใน Zustand store
+            set({
+                user: res.data.user,
+                token: res.data.token,
+            });
+
+            return res;
+        } catch (err) {
+            console.log('Google Sign-In failed:', err);
+            throw err;
+        }
+    },  
     getCategory: async () => {
         try {
             const res = await listCategory()

@@ -16,18 +16,20 @@ datasource db1 {
 //ผู้ใช้
 model User {
   // set ค่า id เป็น default และให้จัดการเองอัตโนมัติ
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
+  id        Int        @id @default(autoincrement())
+  email     String     @unique
   password  String? //สามารถใส่ค่าว่างได้ เพราะจะไปต่อยอด login Google
+  googleId  String? // เก็บ Google ID (optional)
   name      String?
   picture   String?
-  role      String?  @default("user")
-  enabled   Boolean  @default(true) //เอาไว้เปิดปิดผู้ใช้งาน ถ้าสมัครแล้วจะเป็น true
+  role      String?    @default("user")
+  enabled   Boolean    @default(true) //เอาไว้เปิดปิดผู้ใช้งาน ถ้าสมัครแล้วจะเป็น true
   address   String?
   orders    Order[]
   carts     Cart[]
-  createdAt DateTime @default(now()) //บันทึกเวลาลงข้อมูล
-  updatedAt DateTime @updatedAt //แก้ไขเวลาลงข้อมูล
+  articles  Articles[]
+  createdAt DateTime   @default(now()) //บันทึกเวลาลงข้อมูล
+  updatedAt DateTime   @updatedAt //แก้ไขเวลาลงข้อมูล
 }
 
 //สินค้า
@@ -118,4 +120,29 @@ model Image {
   updatedAt  DateTime @updatedAt //แก้ไขเวลาลงข้อมูล
   product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId  Int
+}
+
+// บทความ
+model Articles {
+  id        Int             @id @default(autoincrement()) // Primary Key
+  title     String // ชื่อบทความ
+  content   String // เนื้อหาของบทความ
+  images    Imagearticles[] // รูปภาพประกอบบทความ (One-to-Many)
+  createdAt DateTime        @default(now()) // บันทึกเวลาลงข้อมูล
+  updatedAt DateTime        @updatedAt // แก้ไขเวลาลงข้อมูล
+  author    User            @relation(fields: [authorId], references: [id]) // ผู้เขียนบทความ
+  authorId  Int
+}
+
+// รูปภาพประกอบบทความ
+model Imagearticles {
+  id         Int      @id @default(autoincrement())
+  asset_id   String
+  public_id  String
+  url        String
+  secure_url String
+  createdAt  DateTime @default(now()) // บันทึกเวลาลงข้อมูล
+  updatedAt  DateTime @updatedAt // แก้ไขเวลาลงข้อมูล
+  articles   Articles @relation(fields: [articlesId], references: [id], onDelete: Cascade) // เชื่อมกับบทความ
+  articlesId Int
 }

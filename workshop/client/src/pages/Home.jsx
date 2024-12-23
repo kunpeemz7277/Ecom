@@ -1,10 +1,18 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { ShoppingCart } from 'lucide-react';
 import ContentCarousel from '../components/home/ContentCarousel';
 import BestSeller from '../components/home/BestSeller';
 import NewProduct from '../components/home/NewProduct';
+import useEcomStore from '../store/ecom-store'
 
 const Home = () => {
+  const getProduct = useEcomStore((state) => state.getProduct)
+  const products = useEcomStore((state) => state.products)
+
+  useEffect(() => {
+    getProduct()
+  }, [])
+
   return (
     <div>
       <ContentCarousel />
@@ -114,7 +122,7 @@ const Home = () => {
       {/* Flex 1 */}
 
 
-      
+
 
 
 

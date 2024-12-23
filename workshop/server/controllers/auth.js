@@ -1,6 +1,9 @@
 const prisma = require('../config/prisma')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const { OAuth2Client } = require('google-auth-library')
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 exports.register = async (req, res) => {
     //code
@@ -55,6 +58,55 @@ exports.register = async (req, res) => {
         res.status(500).json({ message: "Server Error" })
     }
 }
+
+// Backend (Controller: googleSignin)
+exports.googleSignin = async (req, res) => {
+    try {
+        const { token } = req.body; // รับ token จาก client
+
+        // ตรวจสอบความถูกต้องของ Google Token
+        const ticket = await client.verifyIdToken({
+            idToken: token,
+            audience: process.env.GOOGLE_CLIENT_ID, // ใส่ Google Client ID ของคุณ
+        });
+
+        // ดึงข้อมูลจาก Google Payload
+        const payload = ticket.getPayload();
+        const { email, name, sub: googleId } = payload;
+
+        // ตรวจสอบว่าผู้ใช้นี้มีอยู่ในระบบหรือยัง
+        let user = await prisma.user.findFirst({
+            where: { email: email },
+        });
+
+        if (!user) {
+            // ถ้าไม่มีผู้ใช้อยู่ในระบบ ให้สร้างใหม่
+            user = await prisma.user.create({
+                data: {
+                    email,
+                    name,
+                    googleId, // เก็บ Google ID เพื่อใช้อ้างอิงในอนาคต
+                },
+            });
+        }
+
+        // สร้าง Token ให้ผู้ใช้เข้าสู่ระบบ
+        const jwtPayload = {
+            id: user.id,
+            email: user.email,
+            role: user.role || 'user', // ตั้งค่า role เริ่มต้นเป็น 'user' ถ้าไม่มี
+        };
+
+        const tokenJwt = jwt.sign(jwtPayload, process.env.SECRET, { expiresIn: '1d' });
+
+        // ส่ง Token และข้อมูลผู้ใช้กลับไปยัง client
+        res.json({ token: tokenJwt, user });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server Error' });
+    }
+};
+
 
 exports.login = async (req, res) => {
     //code
